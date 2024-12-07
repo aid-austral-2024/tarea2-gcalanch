@@ -25,21 +25,20 @@ En el presente trabajo, se planteó el desarrollo experimental de una aplicació
 
 Los ETF´s (Exchange Traded Fund) son activos financieros que se utilizan como elementos de inversion y ofrecen diversificación, liquidez y costos bajos.
 
-El análisis comparativo de los valores relativos entre distintos ETF's y commodities es de utilidad para mejorar la comprensión de dinámicas de mercados, identificar tendencias y evaluar riesgos de inversión, ademas permite dar una perspectiva sobre cómo se comportan diferentes activos en relación con otros al momento evaluar estrategias de inversion en términos de diversificación y cobertura. 
-
+El análisis comparativo de los valores relativos entre distintos ETF's y commodities es de utilidad para mejorar la comprensión de dinámicas de mercados, identificar tendencias y evaluar riesgos de inversión, ademas permite dar una perspectiva sobre cómo se comportan diferentes activos en relación con otros al momento evaluar estrategias de inversion en términos de diversificación y cobertura.
 
 ## Selección de Datos
 
 -   Para la importación de información se realizó una búsqueda de los paquetes y funciones disponibles en [CRAN: Available Packages By Name](https://cran.r-project.org/web/packages/available_packages_by_name.html) que trabajen con datos financieros.
 
-- Se eligió de allí para su uso el paquete ‘pdfetch’, que tiene varias funciones para obtener series históricas de datos económicos y financieros de fuentes públicas, como el sistema FRED de la FED de EEUU, Yahoo Finanzas, el Banco Mundial y la agencia Eurostat, entre otras. Información de este paquete en la carpeta Documentos. 
-- Los datos importados con este paquete son objetos XTS, que vienen con un componente index para indexar los datos temporalmente.
+-   Se eligió de allí para su uso el paquete ‘pdfetch’, que tiene varias funciones para obtener series históricas de datos económicos y financieros de fuentes públicas, como el sistema FRED de la FED de EEUU, Yahoo Finanzas, el Banco Mundial y la agencia Eurostat, entre otras. Información de este paquete en la carpeta Documentos.
 
+-   Los datos importados con este paquete son objetos XTS, que vienen con un componente index para indexar los datos temporalmente.
 
-- Los ETF elegidos, siguen a un Indice que represente a algún tipo de actividad económica
+-   Los ETF elegidos, siguen a un Indice que represente a algún tipo de actividad económica
 
 | ETF | Nombre | Que representa ? |
-|-----|------------------|---------------------------------------|
+|------------------|------------------|------------------------------------|
 | GLD | SPDR Gold Shares | Valor internacional del Oro |
 | SPY | S&P500 | Principales acciones de la bolsa de NY |
 | IWM | Russell 2000 | Capitalización de las pequeñas empresas de EEUU |
@@ -51,10 +50,10 @@ El análisis comparativo de los valores relativos entre distintos ETF's y commod
 
 : Tabla de los ETF elegidos {.striped .hover}
 
-- Los commodities que fueron seleccionados para tener una comparación entre algunas **materias primas**, **alimentos** y **energía** son los siguientes:
+-   Los commodities que fueron seleccionados para tener una comparación entre algunas **materias primas**, **alimentos** y **energía** son los siguientes:
 
 | Reporte FED | Commodity | Unidad |
-|-----------------|--------------------------------------|-----------------|
+|-------------------|-----------------------------------|-------------------|
 | MCOILWTICO | Crude Oil (WTI) | *\[USD/Barrel\]* |
 | PNGASEUUSDM | Global price of Natural gas | *\[USD/Million Metric BTU (MMBTU)\]* |
 | PCOALAUUSDM | Global price of Coal | *\[USD/Ton\]* |
@@ -78,17 +77,15 @@ El análisis comparativo de los valores relativos entre distintos ETF's y commod
 
 : Tabla de los Commodities elegidos {.striped .hover}
 
-
 ## Limpieza de Datos
 
 El trabajo se estructuró en dos archivos de R separados, uno para importar y organizar los datos (llamado *"Codigo_TP2.R"*) y que los guarda en *"baseDatosTP2.rds"* para que lo pueda acceder el otro archivo que es la app de Shiny (llamado *"app.R"*) para que los pueda cargar y realizar la visualización.
 
 Los datos importados con las funciones del paquete ‘pdfetch’ son objetos XTS. Éstos objetos vienen con un componente Index para indexar los datos temporalmente. Éstos objetos luego son convertidos a data frame para facilitar la limpieza y organización de los datos, principalmente las fechas.
 
+##### Importacion Datos
 
-##### Importacion Datos 
-
-- Se trabajó en bases de tiempo mensuales y para los activos financieros se eligieron los valores de cierre en la cotización.
+-   Se trabajó en bases de tiempo mensuales y para los activos financieros se eligieron los valores de cierre en la cotización.
 
 ```{r}
 # Librerías a utilizar ----
@@ -126,8 +123,8 @@ df_etf_xts <- merge(
   pdfetch_YAHOO("ARKK", from = "1990-01-01", field = "close", interval = "monthly")
 )
 ```
-- Para facilitar su posterior comprensión se renombrar las variables
 
+-   Para facilitar su posterior comprensión se renombrar las variables
 
 ```{r}
 # Organización de los Datos ----
@@ -146,8 +143,7 @@ nombres_etf <- c(
 colnames(df_etf_xts) <- nombres_etf
 ```
 
-- Se convierte el tipo de data frame, se igualan las fechas al primer día del mes, ya que los diferentes datos vienen publicados en diferentes días del mes.
-Luego se unifica la base de datos y se guarda en el archivo *"baseDatosTP2.rds"* para que quede disponible para la aplicación de Shiny.
+-   Se convierte el tipo de data frame, se igualan las fechas al primer día del mes, ya que los diferentes datos vienen publicados en diferentes días del mes. Luego se unifica la base de datos y se guarda en el archivo *"baseDatosTP2.rds"* para que quede disponible para la aplicación de Shiny.
 
 ```{r}
 # Conversión del tipo de data frame ----
@@ -169,12 +165,11 @@ df <- merge(df_commodities, df_etf)
 saveRDS(df, file = "baseDatosTP2.rds")
 ```
 
-
 ## Aplicacion Shiny
 
 ##### Preparacion de datos
 
-- Carga de librerías a utilizar
+-   Carga de librerías a utilizar
 
 ```{r}
 #  Librerías a utilizar  ----
@@ -183,15 +178,14 @@ library(tidyverse)
 library(plotly)
 ```
 
-- Importación de la base de datos
+-   Importación de la base de datos
 
 ```{r}
 # Importación de la base de datos ----
 base_datos <- readRDS("baseDatosTP2.rds")
 ```
 
-
-- Se realiza una selección de las opciones a utilizar en las comparaciones relativas (se usan los nombres de las variables)
+-   Se realiza una selección de las opciones a utilizar en las comparaciones relativas (se usan los nombres de las variables)
 
 ```{r}
 # Listado de los commodities y activos financieros disponibles ----
@@ -201,11 +195,11 @@ opciones_commodity <- base_datos |>
   sort()
 ```
 
-###### Definicion de la Interfaz de Usuario 
-En esta se diseña la apariencia visual de la aplicación con la que interactúan los usuarios. 
+###### Definicion de la Interfaz de Usuario
 
-La etapa UI se define con la función **fluidPage()** y dentro se usan las funciones **sidebarLayout()** para la organización de los elementos **sliderInput()** y **selectInput()** que son los controles de entrada.
-También se define el elemento de salida **mainPanel()** con el gráfico **plotlyOutput()**.
+En esta se diseña la apariencia visual de la aplicación con la que interactúan los usuarios.
+
+La etapa UI se define con la función **fluidPage()** y dentro se usan las funciones **sidebarLayout()** para la organización de los elementos **sliderInput()** y **selectInput()** que son los controles de entrada. También se define el elemento de salida **mainPanel()** con el gráfico **plotlyOutput()**.
 
 ```{r}
 # Definición de la Interfaz de Usuario ----
@@ -263,17 +257,17 @@ ui <- fillPage(
 
 ```
 
-###### Definicion de la etapa Server 
+###### Definicion de la etapa Server
 
 Esta es la etapa de la aplicación Shiny que contiene el código para procesar las entradas del usuario que se reciben a través de la UI, se procesan, se realizan cálculos y se generan las salidas que se muestran en la interfaz de usuario, respondiendo a las acciones del usuario y actualizando la UI de forma dinámica.
 
-- Primero se definen una serie de objetos reactivos, los que son para la selección del usuario de los datos a comparar, el del rango de fechas y el de el título a presentar en el gráfico. 
-- Continua la llamada al gráfico que es la salida elegida para esta aplicación. 
-- Dentro de esta llamada se realizan los calculo para generar las salidas: 
-    - Se filtran las fechas que están dentro del rango seleccionado
-    - Se realiza la comparativa relativa entre los commodities seleccionados 
-    - Se construye un texto para el gráfico dinámico de Plotly
-- Por ultimo se llama al gráfico de Plotly
+-   Primero se definen una serie de objetos reactivos, los que son para la selección del usuario de los datos a comparar, el del rango de fechas y el de el título a presentar en el gráfico.
+-   Continua la llamada al gráfico que es la salida elegida para esta aplicación.
+-   Dentro de esta llamada se realizan los calculo para generar las salidas:
+    -   Se filtran las fechas que están dentro del rango seleccionado
+    -   Se realiza la comparativa relativa entre los commodities seleccionados
+    -   Se construye un texto para el gráfico dinámico de Plotly
+-   Por ultimo se llama al gráfico de Plotly
 
 ```{r}
 # Definicion del Server ----
@@ -339,7 +333,7 @@ server <- function(input, output, session) {
   
 ```
 
-###### Ejecucion de la Aplicacion 
+###### Ejecucion de la Aplicacion
 
 Por ultimo se ejecuta la aplicación
 
@@ -348,48 +342,58 @@ Por ultimo se ejecuta la aplicación
 # Ejecución de aplicación ---- 
 shinyApp(ui = ui, server = server)
 ```
+
 ## Resultados
 
-A continuacion se muestra una imagen de la aplicación experimental desarrollada.
+A continuación se muestra una imagen de la aplicación experimental desarrollada.
 
-![Imagen de la aplicacion Shiny](appShiny.png){fig-align="center" width=100%}
+![Imagen de la aplicacion Shiny](appShiny.png){fig-align="center" width="100%"}
+
 ## Conclusiones
 
-- Una de las principales dificultades encontradas estuvo en conseguir datos útiles. Si bien existen diversas fuentes de datos públicos, no resultó fácil dar con los datos pretendidos.
-- **Proximos pasos:** Se podrían agregar otros indicadores económicos de distintas regiones como ingresos promedio, valor de inmuebles y tipos de cambio de monedas.
-  
+-   Una de las principales dificultades encontradas estuvo en conseguir datos útiles. Si bien existen diversas fuentes de datos públicos, no resultó fácil dar con los datos pretendidos.
+-   **Próximos pasos:**
+    -   Se podrían agregar otros indicadores económicos de distintas regiones como ingresos promedio, valor de inmuebles y tipos de cambio de monedas.
+    -   Aplicar clustering de una selección de activos financieros para segmentar por correlación, para poder hacer carteras diversificadas, es decir, con activos no conrrelacionadas.
 
 ------------------------------------------------------------------------
 
 ## Apéndice
 
-A continuacion se plantea una evaluación de la utilidad de la aplicación. 
+A continuacion se plantea una evaluación de la utilidad de la aplicación.
 
 #### Evaluacion de la utilidad de la aplicacion.
+
 El análisis comparativo de los precios relativos entre **ETF’s** y **commodities** proporciona información sobre la diversificación y el riesgo, permitiendo a inversores tomar decisiones cómo ajustar sus carteras de inversión.
 
 #### 1. **Diversificación y Estrategias de Cobertura:**
-Una practica recomendada es diversificar inversiones para reducir el riesgo en el portfolio, tener una menor volatilidad, y para esto necesario incluir activos con correlaciones bajas entre sí.
-Evaluar precios relativos entre **ETF’s** y **commodities** ayuda a identificar posibles relaciones entre activos. Por ejemplo, el ETF **GLD** (que sigue el precio del oro) y commodities como **Petróleo** o **cobre** suelen tener correlaciones diferentes a los índices de acciones representados por **SPY** (S&P 500) o **IWM** (Russell 2000). 
 
-Los ETF’s como **VNQ** (sector inmobiliario) o **XLF** (sector financiero) tienen comportamientos que suelen estar más relacionados con la economía en general, mientras que commodities como **Soja**, **Trigo** o **Carne** pueden ser más sensibles a factores como el clima y la oferta y demanda global. 
+Una practica recomendada es diversificar inversiones para reducir el riesgo en el portfolio, tener una menor volatilidad, y para esto necesario incluir activos con correlaciones bajas entre sí. Evaluar precios relativos entre **ETF’s** y **commodities** ayuda a identificar posibles relaciones entre activos. Por ejemplo, el ETF **GLD** (que sigue el precio del oro) y commodities como **Petróleo** o **cobre** suelen tener correlaciones diferentes a los índices de acciones representados por **SPY** (S&P 500) o **IWM** (Russell 2000).
 
-Analizar cómo el comportamiento de estos activos en conjunto permite desarrollar **estrategias de cobertura** más eficientes, protegiendo a inversores de posibles movimientos adversos en los mercados. 
+Los ETF’s como **VNQ** (sector inmobiliario) o **XLF** (sector financiero) tienen comportamientos que suelen estar más relacionados con la economía en general, mientras que commodities como **Soja**, **Trigo** o **Carne** pueden ser más sensibles a factores como el clima y la oferta y demanda global.
+
+Analizar cómo el comportamiento de estos activos en conjunto permite desarrollar **estrategias de cobertura** más eficientes, protegiendo a inversores de posibles movimientos adversos en los mercados.
 
 #### 2. **Correlaciones y Tendencias de Mercado:**
+
 Estudiar las correlaciones, tendencias y dinámicas de distintos activos permite comprender mejor los factores macroeconómicos que afectan los mercados y desarrollar estrategias de inversión más efectivas. Por ejemplo, los precios de commodities como **Petróleo** o **Gas** suelen depender de factores geopolíticos y la oferta global, mientras que ETFs como **SPY** responden a políticas monetarias y fiscales en EE.UU. Comparando tendencias, se pueden identificar momentos favorables para invertir en commodities o ETFs, según los factores macroeconómicos. Un análisis de correlación entre **Petróleo** y **XLF** puede revelar el impacto del petróleo en el sector financiero, y la relación entre **Soja** y **VWO** muestra cómo las materias primas afectan los mercados emergentes.
 
 #### 3. **Condiciones Macroeconómicas y Factores Externos:**
-Commodities como **Trigo**, **Azúcar** o **Cacao** son afectados como el clima, políticas agrícolas y comerciales, mientras que ETF’s ligados a acciones, como **SPY** o el **ARKK** (innovaciones disruptivas), responden  principalmente a expectativas de crecimiento económico y tasas de interés.
+
+Commodities como **Trigo**, **Azúcar** o **Cacao** son afectados como el clima, políticas agrícolas y comerciales, mientras que ETF’s ligados a acciones, como **SPY** o el **ARKK** (innovaciones disruptivas), responden principalmente a expectativas de crecimiento económico y tasas de interés.
 
 #### 4. **Evaluación del Riesgo y Oportunidades de Inversión:**
+
 El análisis de precios relativos entre commodities y ETFs permite evaluar riesgos de inversión. Por ejemplo, el **GLD**, como activo refugio, se compara con commodities como **Petróleo** o **Carne** para ajustar los portafolios según las condiciones económicas. ETFs como **ARKK**, más volátiles y enfocados en tecnología disruptiva, pueden balancearse con commodities como **Hierro** o **Cobre** para manejar el riesgo y optimizar las inversiones según las proyecciones globales.
 
 #### 5. **Impacto de Factores Globales:**
+
 Los precios de los commodities son fuertemente influenciados por factores globales como conflictos geopolíticos y políticas de productores. Comparar ETF’s como **VNQ** (bienes raices) o **VWO** (mercados emergentes) puede ayudar a identificar desconexiones entre los mercados de commodities y acciones, señalando posibles oportunidades o riesgos.
 
 #### 6. **Análisis Fundamental y Técnico:**
+
 La comparación entre ETF’s y commodities proporciona información valiosa para el análisis **fundamental** (oferta y demanda subyacentes) y **técnico** (tendencias y patrones de precios). Por ejemplo, un análisis técnico entre **Cobre** y el ETF **SPY** puede indicar las expectativas de crecimiento industrial y el comportamiento de las acciones en el S&P 500.
 
 #### En resumen:
+
 El análisis comparativo de los precios relativos entre **ETF’s** y **commodities** proporciona información sobre la diversificación y el riesgo, permitiendo a inversores tomar decisiones cómo ajustar sus carteras de inversión. Al estudiar las correlaciones, tendencias y dinámicas de los distintos activos, los inversores pueden obtener una mejor comprensión de los factores macroeconómicos que influyen en los mercados y desarrollar estrategias de inversión más efectivas. ETF´s : S&P500 (de USA, EUROPA, China, JPN y mercados emergentes).
