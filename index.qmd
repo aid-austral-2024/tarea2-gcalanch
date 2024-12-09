@@ -208,7 +208,7 @@ ui <- fillPage(
   theme = bs_theme(
     version = 5, # Usar la versión más reciente de Bootstrap 5
     bootswatch = "darkly", # Tema oscuro de Bootswatch
-    primary = "#FF7F27" # Color principal (verde)
+    primary = "#FF7F27" # Color principal (anaranjado)
   ),
   
   titlePanel("Comparador de Commodities y Activos Financieros", 
@@ -277,9 +277,11 @@ server <- function(input, output, session) {
   titulo_reactivo <- reactive({
     paste0(
       "Valor de ",
-      str_to_upper(commodity1_reactivo()), " medido en unidades de ",str_to_upper(commodity2_reactivo()),
-      " entre: ", paste0(format.Date(fechas_reactivo(), "%b %Y", 
-                                     date_names = "es"), collapse = " - ")
+      str_to_upper(commodity1_reactivo()), " medido en unidades de ",
+      str_to_upper(commodity2_reactivo()), " entre: ", 
+      paste0(format.Date(fechas_reactivo(), "%b %Y", 
+                        date_names = "es"), 
+             collapse = " - ")
     )
   })
   

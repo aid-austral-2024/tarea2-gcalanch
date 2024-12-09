@@ -82,9 +82,11 @@ server <- function(input, output, session) {
   titulo_reactivo <- reactive({
     paste0(
       "Valor de ",
-      str_to_upper(commodity1_reactivo()), " medido en unidades de ",str_to_upper(commodity2_reactivo()),
-      " entre: ", paste0(format.Date(fechas_reactivo(), "%b %Y", 
-                                     date_names = "es"), collapse = " - ")
+      str_to_upper(commodity1_reactivo()), " medido en unidades de ", 
+      str_to_upper(commodity2_reactivo()), " entre: ", 
+      paste0(format.Date(fechas_reactivo(), "%b %Y", 
+                        date_names = "es"), 
+             collapse = " - ")
     )
   })
   
