@@ -9,6 +9,7 @@
 library(shiny)
 library(tidyverse)
 library(plotly)
+library(bslib)
 
 # Importacion de la base de datos -----------------------------------------
 base_datos <- readRDS("baseDatosTP2.rds")
@@ -22,28 +23,18 @@ opciones_commodity <- base_datos |>
 
 # Definicion de la Interfaz de Usuario ------------------------------------
 ui <- fillPage(
-  tags$head(
-    # CSS  para un diseño oscuro
-    tags$style(HTML("
-      body {
-        background-color: #757575;
-        color: black;
-      }
-      .sidebar {
-        background-color: #1e1e1e;
-        padding: 20px;
-        border-radius: 5px;
-        color: white;
-      }
-      .main {
-        padding: 20px;
-      }
-    "))
+  theme = bs_theme(
+    version = 5, # Usar la versión más reciente de Bootstrap 5
+    bootswatch = "darkly", # Tema oscuro de Bootswatch
+    primary = "#FF7F27" # Color principal (verde)
   ),
+  
   titlePanel("Comparador de Commodities y Activos Financieros", 
-             windowTitle = "Commodities Comparator"), # Titulo de la aplicacion Shiny
+             windowTitle = "Commodities Comparator"), # Titulo de la aplicación Shiny
+  
   sidebarLayout(
     position = "right",
+    
     sidebarPanel(
       class = "sidebar",
       sliderInput(
@@ -52,26 +43,29 @@ ui <- fillPage(
         value = c(ymd("2010-01-01"), as_date(today())), # Valor seleccionado inicialmente
         min = min(base_datos$Index), # Mínimo valor posible
         max = max(base_datos$Index), # Máximo valor posible
-        timeFormat = "%b-%y",
+        timeFormat = "%b-%y"
       ),
+      
       selectInput(
         inputId = "commodity1", # ID del widget
-        label = "Seleccione el 1er Commodity (Numerador): ", # Seleccion del Commodity
+        label = "Seleccione el 1er Commodity (Numerador): ", # Selección del Commodity
         choices = opciones_commodity, # Opciones disponibles
       ),
+      
       selectInput(
         inputId = "commodity2", # ID del widget
-        label = "Seleccione el 2do Commodity (Denominador): ", # Seleccion del Commodity
+        label = "Seleccione el 2do Commodity (Denominador): ", # Selección del Commodity
         choices = opciones_commodity, # Opciones disponibles
-      ),
+      )
     ),
     
     mainPanel(
       class = "main",
       plotlyOutput(outputId = "MiGrafico")
-      )
+    )
   )
 )
+
 
 # Definición del Server ---------------------------------------------------
 server <- function(input, output, session) {
@@ -87,13 +81,13 @@ server <- function(input, output, session) {
   })
   titulo_reactivo <- reactive({
     paste0(
-      "Relacion entre ",
-      commodity1_reactivo(), " y ", commodity2_reactivo(),
+      "Valor de ",
+      str_to_upper(commodity1_reactivo()), " medido en unidades de ",str_to_upper(commodity2_reactivo()),
       " entre: ", paste0(format.Date(fechas_reactivo(), "%b %Y", 
                                      date_names = "es"), collapse = " - ")
     )
   })
-
+  
   output$MiGrafico <- renderPlotly({
     grafico <- base_datos |>
       filter(
@@ -112,24 +106,24 @@ server <- function(input, output, session) {
       ggplot(
         #En aes se define group para que funcione geom_line()
         aes(x = Index, y = relacion, text = texto, group = 1)) + 
-        geom_point(size = 0.5, colour = "orange") +
-        geom_line(size = 0.6, colour = "#428BCA") +
-        labs(
-          title = titulo_reactivo()
-        ) +
-        scale_y_continuous(name = "Relacion") + 
-        scale_x_date(name = "", date_labels = "%b-%y") +
-        theme_minimal()+
-        theme(
-          plot.background = element_rect(fill = "black", color = NA),
-          panel.background = element_rect(fill = "black", color = NA),
-          panel.grid = element_line(color = "gray"),
-          plot.title = element_text(color = "white"),
-          axis.text = element_text(color = "white"),
-          axis.title = element_text(color = "white"),
-          legend.position = "none"
-        ) # Sobre el tema minimal se personalizan los elementos del gráfico
-
+      geom_point(size = 0.5, colour = "yellow") +
+      geom_line(size = 0.6, colour = "#FF7F27") +
+      labs(
+        title = titulo_reactivo()
+      ) +
+      scale_y_continuous(name = "Relacion") + 
+      scale_x_date(name = "", date_labels = "%b-%y") +
+      theme_minimal()+
+      theme(
+        plot.background = element_rect(fill = "black", color = NA),
+        panel.background = element_rect(fill = "black", color = NA),
+        panel.grid = element_line(color = "gray"),
+        plot.title = element_text(color = "white"),
+        axis.text = element_text(color = "white"),
+        axis.title = element_text(color = "white"),
+        legend.position = "none"
+      ) # Sobre el tema minimal se personalizan los elementos del gráfico
+    
     ggplotly(grafico, tooltip = "text")
   })
 }

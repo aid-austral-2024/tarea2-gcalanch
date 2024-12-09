@@ -37,8 +37,8 @@ El análisis comparativo de los valores relativos entre distintos ETF's y commod
 
 -   Los ETF elegidos, siguen a un Indice que represente a algún tipo de actividad económica
 
-| ETF | Nombre | Que representa ? |
-|------------------|------------------|------------------------------------|
+| ETF | Nombre | Qué representa? |
+|--------|------------------|------------------------------------|
 | GLD | SPDR Gold Shares | Valor internacional del Oro |
 | SPY | S&P500 | Principales acciones de la bolsa de NY |
 | IWM | Russell 2000 | Capitalización de las pequeñas empresas de EEUU |
@@ -53,7 +53,7 @@ El análisis comparativo de los valores relativos entre distintos ETF's y commod
 -   Los commodities que fueron seleccionados para tener una comparación entre algunas **materias primas**, **alimentos** y **energía** son los siguientes:
 
 | Reporte FED | Commodity | Unidad |
-|-------------------|-----------------------------------|-------------------|
+|-------------------|-----------------------------------|-----------------|
 | MCOILWTICO | Crude Oil (WTI) | *\[USD/Barrel\]* |
 | PNGASEUUSDM | Global price of Natural gas | *\[USD/Million Metric BTU (MMBTU)\]* |
 | PCOALAUUSDM | Global price of Coal | *\[USD/Ton\]* |
@@ -176,6 +176,7 @@ saveRDS(df, file = "baseDatosTP2.rds")
 library(shiny)
 library(tidyverse)
 library(plotly)
+library(bslib)
 ```
 
 -   Importación de la base de datos
@@ -199,33 +200,23 @@ opciones_commodity <- base_datos |>
 
 En esta se diseña la apariencia visual de la aplicación con la que interactúan los usuarios.
 
-La etapa UI se define con la función **fluidPage()** y dentro se usan las funciones **sidebarLayout()** para la organización de los elementos **sliderInput()** y **selectInput()** que son los controles de entrada. También se define el elemento de salida **mainPanel()** con el gráfico **plotlyOutput()**.
+La etapa UI se define con la función **fillPage()** utilizado bs_theme() con un tema "darkly" de Bootswatch para lograr la estética de un diseño oscuro, y dentro de fillPage() se usan las funciones **sidebarLayout()** para la organización de los elementos **sliderInput()** y **selectInput()** para los controles de entrada. También se define el elemento de salida **mainPanel()** con el gráfico **plotlyOutput()**.
 
 ```{r}
 # Definición de la Interfaz de Usuario ----
 ui <- fillPage(
-  tags$head(
-    # CSS para un diseño oscuro
-    tags$style(HTML("
-      body {
-        background-color: #757575;
-        color: black;
-      }
-      .sidebar {
-        background-color: #1e1e1e;
-        padding: 20px;
-        border-radius: 5px;
-        color: white;
-      }
-      .main {
-        padding: 20px;
-      }
-    "))
+  theme = bs_theme(
+    version = 5, # Usar la versión más reciente de Bootstrap 5
+    bootswatch = "darkly", # Tema oscuro de Bootswatch
+    primary = "#FF7F27" # Color principal (verde)
   ),
+  
   titlePanel("Comparador de Commodities y Activos Financieros", 
-             windowTitle = "Commodities Comparator"), # Título de la aplicación Shiny
+             windowTitle = "Commodities Comparator"), # Titulo de la aplicación Shiny
+  
   sidebarLayout(
     position = "right",
+    
     sidebarPanel(
       class = "sidebar",
       sliderInput(
@@ -234,27 +225,28 @@ ui <- fillPage(
         value = c(ymd("2010-01-01"), as_date(today())), # Valor seleccionado inicialmente
         min = min(base_datos$Index), # Mínimo valor posible
         max = max(base_datos$Index), # Máximo valor posible
-        timeFormat = "%b-%y",
+        timeFormat = "%b-%y"
       ),
+      
       selectInput(
         inputId = "commodity1", # ID del widget
         label = "Seleccione el 1er Commodity (Numerador): ", # Selección del Commodity
         choices = opciones_commodity, # Opciones disponibles
       ),
+      
       selectInput(
         inputId = "commodity2", # ID del widget
         label = "Seleccione el 2do Commodity (Denominador): ", # Selección del Commodity
         choices = opciones_commodity, # Opciones disponibles
-      ),
+      )
     ),
     
     mainPanel(
       class = "main",
       plotlyOutput(outputId = "MiGrafico")
-      )
+    )
   )
 )
-
 ```
 
 ###### Definicion de la etapa Server
@@ -284,13 +276,13 @@ server <- function(input, output, session) {
   })
   titulo_reactivo <- reactive({
     paste0(
-      "Relacion entre ",
-      commodity1_reactivo(), " y ", commodity2_reactivo(),
+      "Valor de ",
+      str_to_upper(commodity1_reactivo()), " medido en unidades de ",str_to_upper(commodity2_reactivo()),
       " entre: ", paste0(format.Date(fechas_reactivo(), "%b %Y", 
                                      date_names = "es"), collapse = " - ")
     )
   })
-
+  
   output$MiGrafico <- renderPlotly({
     grafico <- base_datos |>
       filter(
@@ -309,28 +301,27 @@ server <- function(input, output, session) {
       ggplot(
         #En aes se define group para que funcione geom_line()
         aes(x = Index, y = relacion, text = texto, group = 1)) + 
-        geom_point(size = 0.5, colour = "orange") +
-        geom_line(size = 0.6, colour = "#428BCA") +
-        labs(
-          title = titulo_reactivo()
-        ) +
-        scale_y_continuous(name = "Relacion") + 
-        scale_x_date(name = "", date_labels = "%b-%y") +
-        theme_minimal()+
-        theme(
-          plot.background = element_rect(fill = "black", color = NA),
-          panel.background = element_rect(fill = "black", color = NA),
-          panel.grid = element_line(color = "gray"),
-          plot.title = element_text(color = "white"),
-          axis.text = element_text(color = "white"),
-          axis.title = element_text(color = "white"),
-          legend.position = "none"
-        ) # Sobre el tema minimal se personalizan los elementos del gráfico
-
+      geom_point(size = 0.5, colour = "yellow") +
+      geom_line(size = 0.6, colour = "#FF7F27") +
+      labs(
+        title = titulo_reactivo()
+      ) +
+      scale_y_continuous(name = "Relacion") + 
+      scale_x_date(name = "", date_labels = "%b-%y") +
+      theme_minimal()+
+      theme(
+        plot.background = element_rect(fill = "black", color = NA),
+        panel.background = element_rect(fill = "black", color = NA),
+        panel.grid = element_line(color = "gray"),
+        plot.title = element_text(color = "white"),
+        axis.text = element_text(color = "white"),
+        axis.title = element_text(color = "white"),
+        legend.position = "none"
+      ) # Sobre el tema minimal se personalizan los elementos del gráfico
+    
     ggplotly(grafico, tooltip = "text")
   })
 }
-  
 ```
 
 ###### Ejecucion de la Aplicacion
